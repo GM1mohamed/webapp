@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مليون كتاب | المكتبة الإلكترونية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- شاشة اللوغو المتحرك -->
+    <div class="logo-splash" id="logoSplash">
+        <div class="logo-animation">
+            <div class="logo-icon-animation">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <div class="logo-ar-animation">مليون كتاب</div>
+            <div class="logo-en-animation">1 MILLION BOOKS</div>
+            <div class="developer-splash">
+                <i class="fas fa-code" style="color: #d4a373; font-size: 0.8rem;"></i>
+                <span style="color: #b8c9b0; font-size: 0.75rem; font-weight: 500;">بواسطة Manus AI</span>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <nav>
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><i class="fas fa-book-open"></i></div>
+                <div class="logo-text">
+                    <div class="logo-ar">مليون كتاب</div>
+                    <div class="logo-en">1 MILLION BOOKS</div>
+                </div>
+            </a>
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="ابحث عن كتاب، مؤلف، أو تصنيف..." oninput="handleSearch(this.value)">
+            </div>
+
+            <div class="nav-icons">
+                <a href="login.html" class="nav-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                </a>
+                <a href="admin.html" class="nav-btn">
+                    <i class="fas fa-user-shield"></i> الإدارة
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="stats-bar">
+            <div class="stat">
+                <i class="fas fa-book"></i>
+                <span id="booksCount">0</span>
+                <span>كتاب</span>
+            </div>
+            <div class="stat">
+                <i class="fas fa-download"></i>
+                <span id="totalDownloads">0</span>
+                <span>تحميل</span>
+            </div>
+            <div class="stat">
+                <i class="fas fa-eye"></i>
+                <span id="totalViews">0</span>
+                <span>مشاهدة</span>
+            </div>
+        </div>
+
+        <div class="filters-bar">
+            <div class="filter-group">
+                <select id="categoryFilter" onchange="filterByCategory(this.value)">
+                    <option value="all">جميع التصنيفات</option>
+                </select>
+                <select id="sortBy" onchange="handleSort(this.value)">
+                    <option value="newest">الأحدث أولاً</option>
+                    <option value="oldest">الأقدم أولاً</option>
+                    <option value="popular">الأكثر تحميلاً</option>
+                    <option value="rating">الأعلى تقييماً</option>
+                    <option value="title">أبجدياً (أ-ي)</option>
+                </select>
+            </div>
+            <div class="view-toggle">
+                <button onclick="changeView('grid')" id="gridViewBtn" class="active"><i class="fas fa-th-large"></i></button>
+                <button onclick="changeView('list')" id="listViewBtn"><i class="fas fa-list"></i></button>
+            </div>
+        </div>
+
+        <div id="booksContainer" class="books-grid">
+            <!-- الكتب ستظهر هنا عبر JavaScript -->
+        </div>
+
+        <div id="pagination" class="pagination">
+            <!-- أزرار الترقيم ستظهر هنا -->
+        </div>
+    </main>
+
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>جاري تحميل الكتب...</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // إخفاء شاشة اللودينج بعد انتهاء الأنيميشن
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('logoSplash');
+                if (splash) splash.style.display = 'none';
+            }, 2500);
+        });
+
+        // التحقق من حالة الدخول لتحديث أزرار الهيدر
+        async function updateAuthButtons() {
+            const session = await checkUserSession();
+            const loginBtn = document.getElementById('loginBtn');
+            if (session && loginBtn) {
+                loginBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> تسجيل الخروج';
+                loginBtn.href = '#';
+                loginBtn.onclick = (e) => {
+                    e.preventDefault();
+                    logoutUser();
+                };
+            }
+        }
+        updateAuthButtons();
+    </script>
+</body>
+</html>

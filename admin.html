@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإدارة | المكتبة الإلكترونية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .admin-table-container {
+            background: var(--card-gradient);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: var(--text-color);
+        }
+        th, td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+        .book-cover-small {
+            width: 45px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.8rem;
+            transition: var(--transition);
+            margin-left: 5px;
+        }
+        .edit-btn { background: #2d5a3b; color: white; border: 1px solid var(--accent-color); }
+        .delete-btn { background: #8b3c2c; color: white; }
+        
+        /* Modal Admin Specific */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 47, 31, 0.9);
+            z-index: 1002;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+        .modal-content {
+            background: var(--secondary-color);
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            border: 1px solid var(--accent-color);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            color: var(--accent-light);
+        }
+        .close { cursor: pointer; font-size: 1.5rem; color: var(--accent-color); }
+        
+        #loginOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay">
+        <div class="auth-container">
+            <div class="auth-header">
+                <i class="fas fa-user-shield"></i>
+                <h2 style="color: var(--accent-light); margin-bottom: 20px;">دخول المشرف</h2>
+            </div>
+            <div class="form-group">
+                <label>كلمة مرور الإدارة</label>
+                <input type="password" id="adminPassword" placeholder="أدخل كلمة المرور">
+            </div>
+            <div id="loginError" style="color: #ff4d4d; margin-bottom: 15px; display: none; font-size: 0.85rem;">كلمة المرور غير صحيحة</div>
+            <button onclick="checkLogin()" class="auth-btn">دخول</button>
+            <div class="auth-footer">
+                <a href="index.html" style="color: var(--text-muted);"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Content -->
+    <div id="adminContent" style="display: none;">
+        <header>
+            <nav>
+                <a href="index.html" class="logo">
+                    <div class="logo-icon"><i class="fas fa-book-open"></i></div>
+                    <div class="logo-text">
+                        <div class="logo-ar">لوحة الإدارة</div>
+                        <div class="logo-en">ADMIN DASHBOARD</div>
+                    </div>
+                </a>
+                <div class="nav-icons">
+                    <button onclick="openAddModal()" class="nav-btn">
+                        <i class="fas fa-plus"></i> إضافة كتاب
+                    </button>
+                    <button onclick="refreshData()" class="nav-btn">
+                        <i class="fas fa-sync"></i> تحديث
+                    </button>
+                    <button onclick="confirmClearAll()" class="nav-btn" style="background: rgba(220, 53, 69, 0.2); border-color: rgba(220, 53, 69, 0.4);">
+                        <i class="fas fa-trash-alt"></i> مسح الكل
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <div class="stats-bar">
+                <div class="stat">
+                    <i class="fas fa-book"></i>
+                    <span id="totalBooks">0</span>
+                    <span>كتاب</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-download"></i>
+                    <span id="totalDownloads">0</span>
+                    <span>تحميل</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-star"></i>
+                    <span id="avgRating">0.0</span>
+                    <span>تقييم</span>
+                </div>
+            </div>
+
+            <div class="admin-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الغلاف</th>
+                            <th>العنوان</th>
+                            <th>المؤلف</th>
+                            <th>التصنيف</th>
+                            <th>السنة</th>
+                            <th>التحميلات</th>
+                            <th>المشاهدات</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booksTableBody">
+                        <!-- البيانات ستظهر هنا -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Book Modal -->
+    <div id="bookModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle"><i class="fas fa-plus-circle"></i> إضافة كتاب جديد</h3>
+                <span class="close" onclick="document.getElementById('bookModal').style.display='none'">&times;</span>
+            </div>
+            <form id="bookForm">
+                <input type="hidden" id="bookId">
+                <div class="form-group">
+                    <label>عنوان الكتاب *</label>
+                    <input type="text" id="bookTitle" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>المؤلف *</label>
+                        <input type="text" id="bookAuthor" required>
+                    </div>
+                    <div class="form-group">
+                        <label>التصنيف *</label>
+                        <select id="bookCategory" required style="width: 100%; border-radius: 12px; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: white;">
+                            <option value="تاريخ">تاريخ</option>
+                            <option value="روايات">روايات</option>
+                            <option value="دين">دين</option>
+                            <option value="علوم">علوم</option>
+                            <option value="تطوير ذات">تطوير ذات</option>
+                            <option value="تقنية">تقنية</option>
+                            <option value="أدب">أدب</option>
+                            <option value="أطفال">أطفال</option>
+                            <option value="سياسة">سياسة</option>
+                            <option value="اقتصاد">اقتصاد</option>
+                            <option value="فلسفة">فلسفة</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>رابط صورة الغلاف</label>
+                    <input type="url" id="bookCover" placeholder="https://example.com/cover.jpg">
+                </div>
+                <div class="form-group">
+                    <label>رابط ملف PDF *</label>
+                    <input type="text" id="bookPdf" required placeholder="https://example.com/book.pdf">
+                </div>
+                <div class="form-group">
+                    <label>وصف الكتاب</label>
+                    <textarea id="bookDescription" style="width: 100%; border-radius: 12px; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: white; height: 100px; font-family: 'Tajawal', sans-serif;"></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label>سنة النشر</label>
+                        <input type="number" id="bookYear">
+                    </div>
+                    <div class="form-group">
+                        <label>عدد الصفحات</label>
+                        <input type="number" id="bookPages">
+                    </div>
+                    <div class="form-group">
+                        <label>التقييم (0-5)</label>
+                        <input type="number" id="bookRating" step="0.1" min="0" max="5">
+                    </div>
+                </div>
+                <button type="submit" class="auth-btn">حفظ الكتاب</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>جاري المعالجة...</p>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

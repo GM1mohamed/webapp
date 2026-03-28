@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب | المكتبة الإلكترونية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <i class="fas fa-user-plus"></i>
+            <h2 style="color: var(--accent-light); margin-bottom: 20px;">إنشاء حساب جديد</h2>
+        </div>
+        <form id="registerForm">
+            <div class="form-group">
+                <label>اسم المستخدم</label>
+                <input type="text" id="username" required placeholder="مثلاً: أحمد محمد">
+            </div>
+            <div class="form-group">
+                <label>البريد الإلكتروني</label>
+                <input type="email" id="email" required placeholder="example@email.com">
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="password" required placeholder="********">
+            </div>
+            <button type="submit" id="submitBtn" class="auth-btn">تسجيل</button>
+        </form>
+        <div class="auth-footer">
+            لديك حساب بالفعل؟ <a href="login.html">سجل دخولك</a>
+            <br><br>
+            <a href="index.html" style="color: var(--text-muted); font-size: 0.8rem;"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value;
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري التسجيل...';
+            
+            const result = await registerUser(email, password, username);
+            if (result.success) {
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'تسجيل';
+            }
+        });
+    </script>
+</body>
+</html>
+</html>
